@@ -1,4 +1,8 @@
-"""Draw overlapping circles"""
+"""
+Draw overlapping circles
+TODO refactor using variable sizes for drawing but not _less_ than 400x400 -> implicit radius
+TODO also leave only 3 controls: label "Size: ", wxSpinCtrl and draw button
+"""
 import wx
 import typing
 import inspection
@@ -21,10 +25,6 @@ class Canvas(wx.Panel):
     def height():
         return 400
 
-    @staticmethod
-    def radius():
-        return 100
-
     def on_size(self, event):
         event.Skip()
         self.Refresh()
@@ -33,17 +33,18 @@ class Canvas(wx.Panel):
         dc = wx.AutoBufferedPaintDC(self)
         dc.Clear()
         dc.SetPen(wx.Pen(wx.BLACK, 1))
-        dc.DrawCircle(__class__.width() / 2, __class__.height() / 2, __class__.radius())
+        dc.DrawCircle(__class__.width() / 2, __class__.height() / 2, 100)
 
 
 class Frame(wx.Frame):
     def __init__(self):
         super(Frame, self).__init__(None)
-        self.SetTitle('Overlapping circles pattern')
+        self.title = 'Overlapping circles pattern'
+        self.SetTitle(self.title)
         self.Center()
-        self.on_load()
+        self._init_gui()
 
-    def on_load(self) -> None:
+    def _init_gui(self) -> None:
         """Initialize the interface"""
         main_sizer: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -111,14 +112,15 @@ class Frame(wx.Frame):
         event.Skip()
         self.Destroy()
 
-    def on_text_ctrl_size_enter(self, event) -> None:
+    def on_text_ctrl_size_enter(self, _) -> None:
         print('Entered size: {}'.format(self.text_ctrl_size.GetValue()))
 
-    def on_text_ctrl_radius_enter(self, event) -> None:
+    def on_text_ctrl_radius_enter(self, _) -> None:
         print('Entered radius: {}'.format(self.text_ctrl_radius.GetValue()))
 
-    def draw_canvas(self, event) -> None:
-        pass
+    def draw_canvas(self, _) -> None:
+        dlg: wx.MessageDialog = wx.MessageDialog(self, 'Not implemented yet', caption=self.title, style=wx.OK)
+        dlg.ShowModal()
 
 
 def main() -> None:
