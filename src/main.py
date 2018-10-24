@@ -19,11 +19,11 @@ class Canvas(wx.Panel):
     # Constants
     @staticmethod
     def width():
-        return 400
+        return 330
 
     @staticmethod
     def height():
-        return 400
+        return 330
 
     def on_size(self, event):
         event.Skip()
@@ -72,41 +72,42 @@ class Frame(wx.Frame):
         ctrl.Bind(wx.EVT_SPIN, edit_handler)
         return ctrl
 
-    def _top_controls(self, parent: wx.Panel) -> wx.GridBagSizer:
+    def _top_controls(self, parent: wx.Panel) -> wx.BoxSizer:
+        border = 10
         """
         Initialize the main panel and all its children.
         TODO: none of the controls change their sizes when resizing the window
         :returns The result (the BoxSizer grid), should be attached back to the panel
         """
-        sizer_vgap, sizer_hgap = 10, 5
-        sizer: wx.GridBagSizer = wx.GridBagSizer(sizer_vgap, sizer_hgap)
+        sizer: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.AddSpacer(border)
         # Style for the text boxes
         label_style = wx.ALIGN_LEFT | wx.ST_ELLIPSIZE_END
-        for pos, name in enumerate(['Size:', 'Radius:']):
-            label_size: wx.StaticText = wx.StaticText(parent, label=name, style=label_style)
-            # A new sizer for our label to help it center normally
-            help_sizer: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
-            help_sizer.Add(label_size, wx.SizerFlags(1).Expand().Border(wx.ALL, 5))
-            sizer.Add(help_sizer,
-                      wx.GBPosition(pos, 0),
-                      flag=wx.EXPAND,
-                      border=10)
+        label_size: wx.StaticText = wx.StaticText(parent, label='Size:', style=label_style)
+        # A new sizer for our label to help it center normally
+        help_sizer: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
+        help_sizer.Add(label_size, wx.SizerFlags())
+        sizer.Add(help_sizer, wx.SizerFlags().Center())
+        sizer.AddSpacer(border)
 
         # Text controls
         self.text_ctrl_size = self._add_text_ctrl(parent, self.on_text_ctrl_size_enter)
-        self.text_ctrl_radius = self._add_text_ctrl(parent, self.on_text_ctrl_radius_enter)
-        for pos, ctrl in enumerate([self.text_ctrl_size, self.text_ctrl_radius]):
-            sizer.Add(ctrl, wx.GBPosition(pos, 1), flag=wx.EXPAND, border=10)
-
+        sizer.Add(self.text_ctrl_size, wx.SizerFlags(1).Expand())
+        sizer.AddSpacer(border)
         # Draw button
         button_draw: wx.Button = wx.Button(parent, label='Draw')
         button_draw.Bind(wx.EVT_BUTTON, self.draw_canvas)
-        button_sizer: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)  # A sizer to hold the button itself
-        button_sizer.Add(button_draw, wx.SizerFlags(1).Center())
         button_grid_sizer: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)  # A sizer to occupy the 2 grid columns
-        button_grid_sizer.Add(button_sizer, wx.SizerFlags(1).Expand())
-        sizer.Add(button_grid_sizer, wx.GBPosition(0, 2), wx.GBSpan(2, 1), flag=wx.EXPAND, border=10)
-        return sizer
+        button_grid_sizer.Add(button_draw, wx.SizerFlags().Expand())
+        sizer.Add(button_grid_sizer, wx.SizerFlags(1).Expand())
+        sizer.AddSpacer(border)
+
+        # Frame sizer: adding vertical borders
+        sizer_frame: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
+        sizer_frame.AddSpacer(border)
+        sizer_frame.Add(sizer, wx.SizerFlags(1).Expand())
+        sizer_frame.AddSpacer(border)
+        return sizer_frame
 
     def on_close(self, event) -> None:
         event.Skip()
