@@ -1,7 +1,6 @@
 """
 Draw overlapping circles
 TODO refactor using variable sizes for drawing but not _less_ than 400x400 -> implicit radius
-TODO also leave only 3 controls: label "Size: ", wxSpinCtrl and draw button
 """
 import wx
 import typing
@@ -11,10 +10,10 @@ import inspection
 class Canvas(wx.Panel):
     def __init__(self, parent):
         super().__init__(parent)
-        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        # self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        self.SetMinSize(wx.Size(__class__.width(), __class__.height()))
         self.Bind(wx.EVT_SIZE, self.on_size)
         self.Bind(wx.EVT_PAINT, self.on_paint)
-        self.SetMinSize(wx.Size(__class__.width(), __class__.height()))
 
     # Constants
     @staticmethod
@@ -30,7 +29,7 @@ class Canvas(wx.Panel):
         self.Refresh()
 
     def on_paint(self, event):
-        dc = wx.AutoBufferedPaintDC(self)
+        dc = wx.PaintDC(self)
         dc.Clear()
         dc.SetPen(wx.Pen(wx.BLACK, 1))
         dc.DrawCircle(__class__.width() / 2, __class__.height() / 2, 100)
@@ -55,9 +54,7 @@ class Frame(wx.Frame):
                        .Align(wx.ALIGN_TOP | wx.EXPAND))
 
         # Bottom: drawing canvas
-        canvas_sizer: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)
-        canvas_sizer.Add(Canvas(self), wx.SizerFlags().Align(wx.EXPAND))
-        main_sizer.Add(canvas_sizer, wx.SizerFlags().Align(wx.EXPAND))
+        main_sizer.Add(Canvas(self), wx.SizerFlags(1).Align(wx.EXPAND))
         self.SetSizerAndFit(main_sizer)
 
         # Fix widths or else header_sizer will show the wrong distance
@@ -73,12 +70,11 @@ class Frame(wx.Frame):
         return ctrl
 
     def _top_controls(self, parent: wx.Panel) -> wx.BoxSizer:
-        border = 10
         """
         Initialize the main panel and all its children.
-        TODO: none of the controls change their sizes when resizing the window
         :returns The result (the BoxSizer grid), should be attached back to the panel
         """
+        border = 10
         sizer: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.AddSpacer(border)
         # Style for the text boxes
@@ -121,6 +117,7 @@ class Frame(wx.Frame):
 
     def draw_canvas(self, _) -> None:
         dlg: wx.MessageDialog = wx.MessageDialog(self, 'Not implemented yet', caption=self.title, style=wx.OK)
+
         dlg.ShowModal()
 
 

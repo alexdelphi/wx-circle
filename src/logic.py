@@ -19,7 +19,7 @@ class Model:
         self.radius = radius
         self.arc_length: float = radius / size  # расстояние одной дуги
 
-    def arcs(self) -> typing.Dict[str, typing.List[typing.Tuple[wx.Point2D, wx.Point2D]]]:
+    def arcs(self) -> typing.Dict[float, typing.List[typing.Tuple[wx.Point2D, wx.Point2D]]]:
         """
         Получаем точки ("сетку") для рисования.
         """
@@ -37,7 +37,7 @@ class Model:
         base_vectors: typing.List[typing.Tuple[str, wx.Point2D]] = [(name, wx.Point2D(
             math.cos(a), math.sin(a)
         )) for name, a in angles]
-        points: typing.Dict[str, typing.List[typing.Tuple[wx.Point2D, wx.Point2D]]] = []
+        points: typing.Dict[float, typing.List[typing.Tuple[wx.Point2D, wx.Point2D]]] = []
         for displacement, name in enumerate(directions):
             # Повернем векторы, заодно конвертируем List<Tuple<str, int>> -> Dictionary<str, int>
             vectors: typing.Dict[str, wx.Point2D] = {k: v
@@ -45,22 +45,10 @@ class Model:
                                                      for k, v in base_vectors[(i + displacement) % direction_count]}
             points_below: typing.List[wx.Point2D] = [
                 row_disp * vectors['up'] + col_disp * v
-                # чтобы не повторять дважды последовательность для "правого" и "левого" векторов
+                # чтобы не повторять отдельно последовательность для "правого" и "левого" векторов
                 for v, start in {vectors['right']: 0, vectors['left']: 1}.items()
                 for col_disp in range(start, self.size)
                 for row_disp in range(-col_disp, self.size)
             ]
-            points[name] = [(x + vectors['up'], x) for x in points_below]
+            points[angles[name]] = [(x + vectors['up'], x) for x in points_below]
         return points
-
-    @staticmethod
-    def distance(x: wx.Point2D, y: wx.Point2D) -> float:
-        return math.sqrt((y[1] - x[1]) ** 2 + (y[0] - x[0]) ** 2)
-
-    """
-    def nearest_points(self) -> typing.List[typing.Tuple[wx.Point2D, wx.Point2D]]:
-        points: typing.List[wx.Point2D] = self._get_points()
-        return [
-            (x, y) for x in points for y in points if abs(__class__.distance(x, y) - 1) <= 1e-3
-        ]
-    """
